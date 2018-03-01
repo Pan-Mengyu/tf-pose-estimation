@@ -8,10 +8,11 @@ import numpy as np
 from estimator import TfPoseEstimator
 from networks import get_graph_path, model_wh
 
+EXIT_KEYS = [113, 27]  # Escape and q
 logger = logging.getLogger('TfPoseEstimator-WebCam')
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.WARNING)
 formatter = logging.Formatter('[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
@@ -67,7 +68,8 @@ if __name__ == '__main__':
                     (0, 255, 0), 2)
         cv2.imshow('tf-pose-estimation result', image)
         fps_time = time.time()
-        if cv2.waitKey(1) == 27:
+        key = cv2.waitKey(1) & 0xff
+        if key in EXIT_KEYS:
             break
         logger.debug('finished+')
 
