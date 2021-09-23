@@ -27,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('--resolution', type=str, default='432x368', help='network input resolution. default=432x368')
     parser.add_argument('--model', type=str, default='mobilenet_thin', help='cmu / mobilenet_thin')
     parser.add_argument('--scales', type=str, default='[None]', help='for multiple scales, eg. [1.0, (1.1, 0.05)]')
+    parser.add_argument('--output_json', type=str, default='/tmp/', help='writing output json dir')
     args = parser.parse_args()
     scales = ast.literal_eval(args.scales)
 
@@ -42,7 +43,7 @@ if __name__ == '__main__':
 
     logger.info('inference image: %s in %.4f seconds.' % (args.image, elapsed))
 
-    image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)
+    image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False, frame=0, output_json_dir=args.output_json)
     # cv2.imshow('tf-pose-estimation result', image)
     # cv2.waitKey()
 

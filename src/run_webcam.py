@@ -26,17 +26,23 @@ if __name__ == '__main__':
     parser.add_argument('--zoom', type=float, default=1.0)
     parser.add_argument('--resolution', type=str, default='432x368', help='network input resolution. default=432x368')
     parser.add_argument('--model', type=str, default='mobilenet_thin', help='cmu / mobilenet_thin')
+    parser.add_argument('--output_json', type=str, default='/tmp/', help='writing output json dir')
     parser.add_argument('--show-process', type=bool, default=False,
                         help='for debug purpose, if enabled, speed for inference is dropped.')
     args = parser.parse_args()
 
     logger.debug('initialization %s : %s' % (args.model, get_graph_path(args.model)))
     w, h = model_wh(args.resolution)
-    e = TfPoseEstimator(get_graph_path(args.model), target_size=(w, h))
+    #e = TfPoseEstimator(get_graph_path(args.model), target_size=(w, h))
+    if w > 0 and h > 0:
+        e = TfPoseEstimator(get_graph_path(args.model), target_size=(w, h))
+    else:
+        e = TfPoseEstimator(get_graph_path(args.model), target_size=(432, 368))
     logger.debug('cam read+')
     cam = cv2.VideoCapture(args.camera)
     ret_val, image = cam.read()
     logger.info('cam image=%dx%d' % (image.shape[1], image.shape[0]))
+    frame = 0
 
     while True:
         ret_val, image = cam.read()
@@ -59,7 +65,9 @@ if __name__ == '__main__':
         humans = e.inference(image)
 
         logger.debug('postprocess+')
-        image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)
+        #image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False)
+        image = TfPoseEstimator.draw_humans(image, humans, imgcopy=False, frame=frame, output_json_dir=args.output_json)
+        frame += 1
 
         logger.debug('show+')
         cv2.putText(image,
