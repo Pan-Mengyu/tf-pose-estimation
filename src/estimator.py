@@ -6,7 +6,10 @@ from collections import namedtuple
 import cv2
 import numpy as np
 import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
 from scipy.ndimage import maximum_filter, gaussian_filter
+import json
+import os
 
 import common
 from common import CocoPairsNetwork, CocoPairs, CocoPart
@@ -102,7 +105,8 @@ class PoseEstimator:
         'idx1', 'idx2',
         'coord1', 'coord2',
         'score1', 'score2'
-    ], verbose=False)
+     ])
+#    ], verbose=False)
 
     def __init__(self):
         pass
@@ -252,13 +256,13 @@ class TfPoseEstimator:
         self.target_size = target_size
 
         # load graph
-        with tf.gfile.GFile(graph_path, 'rb') as f:
-            graph_def = tf.GraphDef()
+        with tf.io.gfile.GFile(graph_path, 'rb') as f:
+            graph_def = tf.compat.v1.GraphDef()
             graph_def.ParseFromString(f.read())
 
-        self.graph = tf.get_default_graph()
+        self.graph = tf.compat.v1.get_default_graph()
         tf.import_graph_def(graph_def, name='TfPoseEstimator')
-        self.persistent_sess = tf.Session(graph=self.graph)
+        self.persistent_sess = tf.compat.v1.Session(graph=self.graph)
 
         # for op in self.graph.get_operations():
         #     print(op.name)
@@ -288,12 +292,15 @@ class TfPoseEstimator:
         return npimg_q
 
     @staticmethod
-    def draw_humans(npimg, humans, imgcopy=False):
+    def draw_humans(npimg, humans, imgcopy=False, frame=0, output_json_dir=None):
         if imgcopy:
             npimg = np.copy(npimg)
         image_h, image_w = npimg.shape[:2]
         centers = {}
-        for human in humans:
+        dc = {"people":[]}
+        #for human in humans:
+        for n, human in enumerate(humans):
+            flat = [0.0 for i in range(36)]
             # draw point
             for i in range(common.CocoPart.Background.value):
                 if i not in human.body_parts.keys():
@@ -302,6 +309,11 @@ class TfPoseEstimator:
                 body_part = human.body_parts[i]
                 center = (int(body_part.x * image_w + 0.5), int(body_part.y * image_h + 0.5))
                 centers[i] = center
+                #cv2.circle(npimg, center, 3, common.CocoColors[i], thickness=3, lineType=8, shift=0)
+                #add x
+                flat[i*2] = center[0]
+                #add y
+                flat[i*2+1] = center[1]
                 cv2.circle(npimg, center, 3, common.CocoColors[i], thickness=3, lineType=8, shift=0)
 
             # draw line
@@ -310,6 +322,11 @@ class TfPoseEstimator:
                     continue
 
                 npimg = cv2.line(npimg, centers[pair[0]], centers[pair[1]], common.CocoColors[pair_order], 3)
+            dc["people"].append({"pose_keypoints_2d" : flat})
+
+        if output_json_dir:
+            with open(os.path.join(output_json_dir, '{0}_keypoints.json'.format(str(frame).zfill(12))), 'w') as outfile:
+                json.dump(dc, outfile)
 
         return npimg
 
