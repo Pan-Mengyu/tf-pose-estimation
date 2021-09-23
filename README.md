@@ -1,5 +1,11 @@
 # tf-pose-estimation for tensorflow 2.0+
 
+## What is new
+
+It can generate 2-D key points in json format with tensorflow 2.0+, as I cannot install tensorflow 1.0+. If you want to use with tensorflow 1.0+, go to branch devel.
+
+## Introduction
+
 'Openpose' for human pose estimation have been implemented using Tensorflow. It also provides several variants that have made some changes to the network structure for **real-time processing on the CPU or low-power embedded devices.**
 
 
@@ -25,7 +31,7 @@ Implemented features are listed here : [features](./etcs/feature.md)
 
 You need dependencies below.
 
-- python3
+- python3.7
 - tensorflow 2.0+
 - opencv3, protobuf, python3-tk
 
@@ -35,6 +41,7 @@ You need dependencies below.
 $ git clone https://www.github.com/ildoonet/tf-openpose
 $ cd tf-openpose
 $ pip3 install -r requirements.txt
+$ pip install tf_slim
 ```
 
 ## Models
@@ -91,7 +98,7 @@ $ bash download.sh
 You can test the inference feature with a single image.
 
 ```
-$ python3 run.py --model=mobilenet_thin --resolution=432x368 --image=...
+$ python3 run.py --model=mobilenet_thin --resolution=432x368 --image=... --output_json /path/to/directory
 ```
 
 The image flag MUST be relative to the src folder with no "~", i.e:
@@ -106,7 +113,7 @@ Then you will see the screen as below with pafmap, heatmap, result and etc.
 ### Realtime Webcam
 
 ```
-$ python3 run_webcam.py --model=mobilenet_thin --resolution=432x368 --camera=0
+$ python run_webcam.py --model=mobilenet_thin --resize=432x368 --camera=0 --output_json /path/to/directory
 ```
 
 Then you will see the realtime webcam screen with estimated poses as below. This [Realtime Result](./etcs/openpose_macbook13_mobilenet2.gif) was recored on macbook pro 13" with 3.1Ghz Dual-Core CPU.
