@@ -1,4 +1,4 @@
-# tf-pose-estimation
+# tf-pose-estimation for tensorflow 2.0+
 
 'Openpose' for human pose estimation have been implemented using Tensorflow. It also provides several variants that have made some changes to the network structure for **real-time processing on the CPU or low-power embedded devices.**
 
@@ -26,7 +26,7 @@ Implemented features are listed here : [features](./etcs/feature.md)
 You need dependencies below.
 
 - python3
-- tensorflow 1.4.1+
+- tensorflow 2.0+
 - opencv3, protobuf, python3-tk
 
 ### Install
